@@ -159,6 +159,8 @@
       margin-top: 60px;
       position: relative;
       transition: margin-top 0.3s ease;
+      height: calc(100vh - 60px);
+      overflow: hidden;
     }
 
     .content-area.ui-hidden {
@@ -173,6 +175,7 @@
       position: relative;
       padding: 0;
       transition: all 0.3s ease;
+      height: calc(100vh - 140px);
     }
 
     .manga-pages.ui-hidden {
@@ -184,7 +187,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
     .manga-pages.scroll-mode {
@@ -193,6 +195,7 @@
       align-items: center;
       gap: 20px;
       padding: 40px 20px;
+      overflow-y: auto;
     }
 
     .scroll-mode .page-number-bg {
@@ -232,12 +235,14 @@
 
     .manga-image {
       max-width: 100%;
-      max-height: 100vh;
+      max-height: calc(100vh - 140px);
       width: auto;
       height: auto;
       object-fit: contain;
       z-index: 10;
       cursor: pointer;
+      display: block;
+      margin: 0 auto;
     }
 
     .footer-nav {
@@ -378,6 +383,10 @@
       .page-number-bg {
         font-size: 120px;
       }
+
+      .manga-image {
+        max-height: calc(100vh - 180px);
+      }
     }
 
     ::-webkit-scrollbar {
@@ -429,9 +438,9 @@
         <div class="footer-left">
         </div>
         <div class="footer-center">
-          <button class="nav-btn" id="prevBtn">上一页</button>
+          <button class="nav-btn" id="prevBtn">上一集</button>
           <span id="pageIndicator">1 / 50</span>
-          <button class="nav-btn" id="nextBtn">下一页</button>
+          <button class="nav-btn" id="nextBtn">下一集</button>
         </div>
         <div class="footer-right"></div>
       </div>
@@ -624,6 +633,9 @@
         document.getElementById('pageNumberBg').textContent = pageNum;
         document.getElementById('pageIndicator').textContent = `${pageNum} / ${episode.pages}`;
         updatePageNavButtons();
+        
+        // 强制滚动到顶部，避免图片被UI挡住
+        document.getElementById('mangaPages').scrollTop = 0;
       }
     }
 
@@ -707,13 +719,12 @@
         }
       });
 
-      // 鼠标滚轮翻页 - 流畅版
+      // 鼠标滚轮翻页
       let wheelTimer = null;
       document.getElementById('mangaPages').addEventListener('wheel', (e) => {
         if (!isScrollMode) {
           e.preventDefault();
           
-          // 节流，防止一次滚动触发多次
           if (wheelTimer) return;
           
           wheelTimer = setTimeout(() => {
@@ -734,10 +745,8 @@
           const windowWidth = window.innerWidth;
           
           if (clickX > windowWidth * 0.7) {
-            // 点击右侧70%区域，下一页
             nextPage();
           } else if (clickX < windowWidth * 0.3) {
-            // 点击左侧30%区域，上一页
             prevPage();
           }
         }
