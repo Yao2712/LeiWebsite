@@ -632,7 +632,7 @@
         document.getElementById('mangaImage').src = imageUrl;
         document.getElementById('pageNumberBg').textContent = pageNum;
         document.getElementById('pageIndicator').textContent = `${pageNum} / ${episode.pages}`;
-        updatePageNavButtons();
+        updatePageButtons();
         
         // 强制滚动到顶部，避免图片被UI挡住
         document.getElementById('mangaPages').scrollTop = 0;
@@ -686,6 +686,13 @@
       }
     }
 
+    function updatePageButtons() {
+      const episode = episodes[currentEpisodeIndex];
+      document.getElementById('prevBtn').disabled = currentEpisodeIndex === 0;
+      document.getElementById('nextBtn').disabled = currentEpisodeIndex === episodes.length - 1;
+      document.getElementById('pageIndicator').textContent = `${currentPage} / ${episode.pages}`;
+    }
+
     function setupEventListeners() {
       document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = './与你编缀的泡沫.html';
@@ -695,17 +702,22 @@
       document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
       document.getElementById('modeToggle').addEventListener('click', toggleReadMode);
       
+      // 上一集/下一集按钮 - 切换章节
       document.getElementById('prevBtn').addEventListener('click', () => {
-        prevPage();
+        if (currentEpisodeIndex > 0) {
+          loadEpisode(currentEpisodeIndex - 1);
+        }
       });
 
       document.getElementById('nextBtn').addEventListener('click', () => {
-        nextPage();
+        if (currentEpisodeIndex < episodes.length - 1) {
+          loadEpisode(currentEpisodeIndex + 1);
+        }
       });
 
       document.getElementById('hideUiBtn').addEventListener('click', toggleUIVisibility);
 
-      // 键盘翻页
+      // 键盘翻页 - 同一章内翻页
       document.addEventListener('keydown', (e) => {
         if (document.getElementById('sidebar').classList.contains('active')) return;
         if (!isScrollMode) {
@@ -719,7 +731,7 @@
         }
       });
 
-      // 鼠标滚轮翻页
+      // 鼠标滚轮翻页 - 同一章内翻页
       let wheelTimer = null;
       document.getElementById('mangaPages').addEventListener('wheel', (e) => {
         if (!isScrollMode) {
@@ -738,7 +750,7 @@
         }
       }, { passive: false });
 
-      // 点击图片翻页
+      // 点击图片翻页 - 同一章内翻页
       document.getElementById('mangaImage').addEventListener('click', (e) => {
         if (!isScrollMode) {
           const clickX = e.clientX;
@@ -763,12 +775,6 @@
     function closeSidebar() {
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('sidebarOverlay').classList.remove('active');
-    }
-
-    function updatePageNavButtons() {
-      const episode = episodes[currentEpisodeIndex];
-      document.getElementById('prevBtn').disabled = currentPage === 1;
-      document.getElementById('nextBtn').disabled = currentPage === episode.pages;
     }
 
     async function toggleReadMode() {
@@ -815,7 +821,6 @@
       uiVisible = !uiVisible;
       const header = document.querySelector('header.top-bar');
       const footer = document.querySelector('.footer-nav');
-      const contentArea = document.querySelector('.content-area');
       const mangaPages = document.getElementById('mangaPages');
       const hideBtn = document.getElementById('hideUiBtn');
       
@@ -823,16 +828,14 @@
         header.classList.remove('hidden');
         footer.classList.remove('hidden');
         hideBtn.classList.remove('hidden');
-        contentArea.classList.remove('ui-hidden');
-        mangaPages.classList.remove('ui-hidden');
+        mangaPages.style.height = 'calc(100vh - 140px)';
         hideBtn.textContent = '«';
         hideBtn.title = '隐藏界面';
       } else {
         header.classList.add('hidden');
         footer.classList.add('hidden');
         hideBtn.classList.add('hidden');
-        contentArea.classList.add('ui-hidden');
-        mangaPages.classList.add('ui-hidden');
+        mangaPages.style.height = '100vh';
         hideBtn.textContent = '»';
         hideBtn.title = '显示界面';
       }
