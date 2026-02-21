@@ -519,20 +519,20 @@
         const match = episode.folder.match(/(\d+)\.EP(\d+)/);
         if (match) {
           zipFileName = `${match[1]}.EP${match[2]}.zip`;
-          imageName = `${match[2]}.${page}.jpg`;
+          imageName = `${episode.folder}/${match[2]}.${page}.jpg`;
         }
       } else if (episode.folder.includes('.SP')) {
         const match = episode.folder.match(/(\d+)\.SP(\d+)/);
         if (match) {
           zipFileName = `${match[1]}.SP${match[2]}.zip`;
-          imageName = `SP${match[2]}.${page}.jpg`;
+          imageName = `${episode.folder}/SP${match[2]}.${page}.jpg`;
         }
       } else if (episode.folder === '特别篇') {
         zipFileName = '特别篇.zip';
-        imageName = `特别篇1.${page}.jpg`;
+        imageName = `特别篇/特别篇1.${page}.jpg`;
       } else if (episode.folder === '联动01话') {
         zipFileName = '联动01话.zip';
-        imageName = `联动1.${page}.jpg`;
+        imageName = `联动01话/联动1.${page}.jpg`;
       }
       
       if (!zipFileName || !imageName) {
@@ -540,6 +540,7 @@
         return null;
       }
       
+      console.log(`尝试读取: ${zipFileName} 内的 ${imageName}`);
       return await getImageFromZip(zipFileName, imageName);
     }
 
