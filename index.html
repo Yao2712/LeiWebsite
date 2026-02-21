@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>入口 · 小站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #1a1a2e;
+            background-image: url('LcorpAyin.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-box {
+            max-width: 700px;
+            padding: 3rem 2.5rem;
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(5px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            margin: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .english {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        .chinese {
+            font-size: 1.6rem;
+            color: white;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+            line-height: 1.5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 1.5rem;
+        }
+        .library-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(110, 142, 251, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 1rem;
+        }
+        .library-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(110, 142, 251, 0.6);
+            background: linear-gradient(135deg, #5d7cf0, #9668d6);
+        }
+        .hint {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <div class="content-box">
+            <div class="english">
+                Welcome, currently still in progress
+            </div>
+            <div class="chinese">
+                欢迎，该区域暂时还在做着<br>欢迎点击下方到达我的图书馆
+            </div>
+            <a href="home libary.html" class="libary-btn">
+                欢迎来到图书馆 →
+            </a>
+            <div class="hint">
+                feel free to come to my libary
+            </div>
+        </div>
+    </div>
+    <!-- 注意：这里没有加载任何JS文件 -->
+</body>
+</html>
