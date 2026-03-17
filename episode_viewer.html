@@ -515,38 +515,38 @@
       return URL.createObjectURL(blob);
     }
 
-    // ========== 修正后的图片路径生成 ==========
+    // ========== 最终修正版图片路径 ==========
     async function getImageUrl(episode, pageNum) {
       const page = String(pageNum);
       let zipFileName, imageName;
       
-      // 普通章节 (EP)
+      // 普通章节 (EP) - 一层文件夹
       if (episode.folder.includes('.EP')) {
         const match = episode.folder.match(/(\d+)\.EP(\d+)/);
         if (match) {
           zipFileName = `${match[1]}.EP${match[2]}.zip`;
           const epNum = parseInt(match[2]);  // 去除前导零
-          imageName = `${episode.folder}/${episode.folder}/${epNum}.${page}.jpg`;
+          imageName = `${episode.folder}/${epNum}.${page}.jpg`;
         }
       }
-      // 番外篇 (SP)
+      // 番外篇 (SP) - 一层文件夹
       else if (episode.folder.includes('.SP')) {
         const match = episode.folder.match(/(\d+)\.SP(\d+)/);
         if (match) {
           zipFileName = `${match[1]}.SP${match[2]}.zip`;
           const spNum = parseInt(match[2]);  // 把 "01" 变成 1
-          imageName = `${episode.folder}/${episode.folder}/SP${spNum}.${page}.jpg`;
+          imageName = `${episode.folder}/SP${spNum}.${page}.jpg`;
         }
       }
       // 特别篇
       else if (episode.folder === '特别篇') {
         zipFileName = '特别篇.zip';
-        imageName = `特别篇/特别篇/特别篇1.${page}.jpg`;
+        imageName = `特别篇/特别篇1.${page}.jpg`;
       }
       // 联动
       else if (episode.folder === '联动01话') {
         zipFileName = '联动01话.zip';
-        imageName = `联动01话/联动01话/联动1.${page}.jpg`;
+        imageName = `联动01话/联动1.${page}.jpg`;
       }
       
       if (!zipFileName || !imageName) {
