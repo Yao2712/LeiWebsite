@@ -28,7 +28,6 @@
       flex-direction: row;
     }
 
-    /* Header */
     header.top-bar {
       position: absolute;
       top: 0;
@@ -98,7 +97,6 @@
       transform: scale(1.1);
     }
 
-    /* Sidebar */
     .sidebar {
       width: 280px;
       background: white;
@@ -154,7 +152,6 @@
       border-color: #667eea;
     }
 
-    /* Main content area */
     .content-area {
       flex: 1;
       display: flex;
@@ -162,6 +159,8 @@
       margin-top: 60px;
       position: relative;
       transition: margin-top 0.3s ease;
+      height: calc(100vh - 60px);
+      overflow: hidden;
     }
 
     .content-area.ui-hidden {
@@ -174,8 +173,9 @@
       overflow-x: hidden;
       background: white;
       position: relative;
-      padding: 40px 20px;
+      padding: 0;
       transition: all 0.3s ease;
+      height: calc(100vh - 140px);
     }
 
     .manga-pages.ui-hidden {
@@ -194,6 +194,8 @@
       flex-direction: column;
       align-items: center;
       gap: 20px;
+      padding: 40px 20px;
+      overflow-y: auto;
     }
 
     .scroll-mode .page-number-bg {
@@ -234,11 +236,15 @@
     .manga-image {
       max-width: 100%;
       max-height: 100%;
+      width: auto;
+      height: auto;
       object-fit: contain;
       z-index: 10;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
     }
 
-    /* Footer Navigation */
     .footer-nav {
       height: 80px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -395,8 +401,8 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #764ba2;
     }
-
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
   <div class="viewer-container">
@@ -429,7 +435,7 @@
         </div>
         <div class="footer-center">
           <button class="nav-btn" id="prevBtn">上一集</button>
-          <span id="pageIndicator">1 / 60</span>
+          <span id="pageIndicator">1 / 50</span>
           <button class="nav-btn" id="nextBtn">下一集</button>
         </div>
         <div class="footer-right"></div>
@@ -438,68 +444,135 @@
   </div>
 
   <script>
-    // Episode configuration
+    // ========== 集数配置 ==========
     const episodes = [
-  { id: 1, name: '第01话', folder: '1.EP1', pages: 50 },
-  { id: 2, name: '第02话', folder: '1.EP2', pages: 25 },
-  { id: 3, name: '第03话', folder: '1.EP3', pages: 25 },
-  { id: 4, name: '第04话', folder: '1.EP4', pages: 21 },
-  { id: 5, name: '第05话', folder: '1.EP5', pages: 37 },
-  { id: 5.5, name: '第5.5话', folder: '1.SP01', pages: 16 },
+      { id: 1, name: '第01话', folder: '1.EP1', pages: 50 },
+      { id: 2, name: '第02话', folder: '1.EP2', pages: 25 },
+      { id: 3, name: '第03话', folder: '1.EP3', pages: 25 },
+      { id: 4, name: '第04话', folder: '1.EP4', pages: 21 },
+      { id: 5, name: '第05话', folder: '1.EP5', pages: 37 },
+      { id: 5.5, name: '番外篇01', folder: '1.SP01', pages: 16 },
+      { id: 6, name: '第06话', folder: '2.EP6', pages: 24 },
+      { id: 7, name: '第07话', folder: '2.EP7', pages: 32 },
+      { id: 8, name: '第08话', folder: '2.EP8', pages: 20 },
+      { id: 9, name: '第09话', folder: '2.EP9', pages: 43 },
+      { id: 10, name: '第10话', folder: '2.EP10', pages: 34 },
+      { id: 10.5, name: '番外篇02', folder: '2.SP02', pages: 9 },
+      { id: 11, name: '第11话', folder: '3.EP11', pages: 24 },
+      { id: 12, name: '第12话', folder: '3.EP12', pages: 34 },
+      { id: 13, name: '第13话', folder: '3.EP13', pages: 24 },
+      { id: 14, name: '第14话', folder: '3.EP14', pages: 42 },
+      { id: 15, name: '第15话', folder: '3.EP15', pages: 34 },
+      { id: 15.5, name: '番外篇03', folder: '3.SP03', pages: 15 },
+      { id: 16, name: '第16话', folder: '4.EP16', pages: 47 },
+      { id: 17, name: '第17话', folder: '4.EP17', pages: 16 },
+      { id: 18, name: '第18话', folder: '4.EP18', pages: 24 },
+      { id: 19, name: '第19话', folder: '4.EP19', pages: 33 },
+      { id: 20, name: '第20话', folder: '4.EP20', pages: 29 },
+      { id: 20.5, name: '番外篇04', folder: '4.SP04', pages: 13 },
+      { id: 21, name: '第21话', folder: '5.EP21', pages: 31 },
+      { id: 22, name: '第22话', folder: '5.EP22', pages: 22 },
+      { id: 23, name: '第23话', folder: '5.EP23', pages: 28 },
+      { id: 24, name: '第24话', folder: '5.EP24', pages: 24 },
+      { id: 25, name: '第25话', folder: '5.EP25', pages: 40 },
+      { id: 25.5, name: '番外篇05', folder: '5.SP05', pages: 11 },
+      { id: 26, name: '第26话', folder: '6.EP26', pages: 15 },
+      { id: 27, name: '第27话', folder: '6.EP27', pages: 25 },
+      { id: 28, name: '第28话', folder: '6.EP28', pages: 41 },
+      { id: 29, name: '第29话', folder: '6.EP29', pages: 33 },
+      { id: 30, name: '第30话', folder: '6.EP30', pages: 24 },
+      { id: 31, name: '第31话', folder: '6.EP31', pages: 41 },
+      { id: 32, name: '第32话', folder: '6.EP32', pages: 49 },
+      { id: 32.5, name: '番外篇06', folder: '6.SP06', pages: 26 },
+      { id: 33, name: '特别篇', folder: '特别篇', pages: 21 },
+      { id: 34, name: '联动01话', folder: '联动01话', pages: 8 }
+    ];
 
-  { id: 6, name: '第06话', folder: '2.EP6', pages: 24 },
-  { id: 7, name: '第07话', folder: '2.EP7', pages: 32 },
-  { id: 8, name: '第08话', folder: '2.EP8', pages: 20 },
-  { id: 9, name: '第09话', folder: '2.EP9', pages: 43 },
-  { id: 10, name: '第10话', folder: '2.EP10', pages: 34 },
-  { id: 10.5, name: '第10.5话', folder: '2.SP02', pages: 9 },
+    // ========== ZIP 加载器 ==========
+    const zipCache = {};
 
-  { id: 11, name: '第11话', folder: '3.EP11', pages: 24 },
-  { id: 12, name: '第12话', folder: '3.EP12', pages: 34 },
-  { id: 13, name: '第13话', folder: '3.EP13', pages: 24 },
-  { id: 14, name: '第14话', folder: '3.EP14', pages: 42 },
-  { id: 15, name: '第15话', folder: '3.EP15', pages: 34 },
-  { id: 15.5, name: '第15.5话', folder: '3.SP03', pages: 15 },
+    async function loadZip(zipFileName) {
+      if (zipCache[zipFileName]) return zipCache[zipFileName];
+      
+      try {
+        const response = await fetch(`./${zipFileName}`);
+        const data = await response.arrayBuffer();
+        const zip = await JSZip.loadAsync(data);
+        zipCache[zipFileName] = zip;
+        console.log(`✅ 加载ZIP: ${zipFileName}`);
+        return zip;
+      } catch (error) {
+        console.error(`❌ 加载ZIP失败: ${zipFileName}`, error);
+        return null;
+      }
+    }
 
-  { id: 16, name: '第16话', folder: '4.EP16', pages: 47 },
-  { id: 17, name: '第17话', folder: '4.EP17', pages: 16 },
-  { id: 18, name: '第18话', folder: '4.EP18', pages: 24 },
-  { id: 19, name: '第19话', folder: '4.EP19', pages: 33 },
-  { id: 20, name: '第20话', folder: '4.EP20', pages: 29 },
-  { id: 20.5, name: '第20.5话', folder: '4.SP04', pages: 13 },
+    async function getImageFromZip(zipFileName, imageName) {
+      const zip = await loadZip(zipFileName);
+      if (!zip) return null;
+      
+      const file = zip.file(imageName);
+      if (!file) {
+        console.error(`❌ ZIP中找不到图片: ${imageName}`);
+        return null;
+      }
+      
+      const blob = await file.async('blob');
+      return URL.createObjectURL(blob);
+    }
 
-  { id: 21, name: '第21话', folder: '5.EP21', pages: 31 },
-  { id: 22, name: '第22话', folder: '5.EP22', pages: 22 },
-  { id: 23, name: '第23话', folder: '5.EP23', pages: 28 },
-  { id: 24, name: '第24话', folder: '5.EP24', pages: 24 },
-  { id: 25, name: '第25话', folder: '5.EP25', pages: 40 },
-  { id: 25.5, name: '第25.5话', folder: '5.SP05', pages: 11 },
+    // ========== 修正后的图片路径生成 ==========
+    async function getImageUrl(episode, pageNum) {
+      const page = String(pageNum);
+      let zipFileName, imageName;
+      
+      // 普通章节 (EP)
+      if (episode.folder.includes('.EP')) {
+        const match = episode.folder.match(/(\d+)\.EP(\d+)/);
+        if (match) {
+          zipFileName = `${match[1]}.EP${match[2]}.zip`;           // 1.EP1.zip
+          imageName = `${episode.folder}/${match[2]}.${page}.jpg`; // 1.EP1/1.1.jpg
+        }
+      }
+      // 番外篇 (SP)
+      else if (episode.folder.includes('.SP')) {
+        const match = episode.folder.match(/(\d+)\.SP(\d+)/);
+        if (match) {
+          zipFileName = `${match[1]}.SP${match[2]}.zip`;                 // 1.SP01.zip
+          imageName = `${episode.folder}/SP${match[2]}.${page}.jpg`;     // 1.SP01/SP1.1.jpg
+        }
+      }
+      // 特别篇
+      else if (episode.folder === '特别篇') {
+        zipFileName = '特别篇.zip';
+        imageName = `特别篇/特别篇1.${page}.jpg`;  // 特别篇/特别篇1.1.jpg
+      }
+      // 联动
+      else if (episode.folder === '联动01话') {
+        zipFileName = '联动01话.zip';
+        imageName = `联动01话/联动1.${page}.jpg`;  // 联动01话/联动1.1.jpg
+      }
+      
+      if (!zipFileName || !imageName) {
+        console.error('无法确定ZIP或图片名', episode, pageNum);
+        return null;
+      }
+      
+      console.log(`尝试读取: ${zipFileName} 内的 ${imageName}`);
+      return await getImageFromZip(zipFileName, imageName);
+    }
 
-  { id: 26, name: '第26话', folder: '6.EP26', pages: 15 },
-  { id: 27, name: '第27话', folder: '6.EP27', pages: 25 },
-  { id: 28, name: '第28话', folder: '6.EP28', pages: 41 },
-  { id: 29, name: '第29话', folder: '6.EP29', pages: 33 },
-  { id: 30, name: '第30话', folder: '6.EP30', pages: 24 },
-  { id: 31, name: '第31话', folder: '6.EP31', pages: 41 },
-  { id: 32, name: '第32话', folder: '6.EP32', pages: 49 },
-  { id: 32.5, name: '第32.5话', folder: '6.SP06', pages: 26 },
-
-  { id: 33, name: '特别篇', folder: '特别篇', pages: 21 },
-  { id: 34, name: '联动01话', folder: '联动01话', pages: 8 },
-]; 
-
-    const basePath = './与你编缀的泡沫/';
+    // ========== 全局变量 ==========
     let currentEpisodeIndex = 0;
     let currentPage = 1;
     let isScrollMode = false;
     let pageElements = [];
     let uiVisible = true;
 
-    // Initialize
+    // ========== 初始化 ==========
     document.addEventListener('DOMContentLoaded', function() {
       initializeEpisodeList();
       
-      // Get episode from URL parameter
       const params = new URLSearchParams(window.location.search);
       const epParam = params.get('ep');
       let startIndex = 0;
@@ -532,213 +605,46 @@
       });
     }
 
-    function loadEpisode(index) {
+    async function loadEpisode(index) {
       currentEpisodeIndex = index;
       currentPage = 1;
       const episode = episodes[index];
       
-      // Update header
       document.getElementById('currentEpisode').textContent = episode.name;
 
-      // Update sidebar active state
       document.querySelectorAll('.episode-link').forEach((link, i) => {
         link.classList.toggle('active', i === index);
       });
 
-      // ===== 强制重置图片容器样式 =====
-      const mangaPages = document.getElementById('mangaPages');
-      const mangaImage = document.getElementById('mangaImage');
-      if (mangaImage) {
-        mangaImage.style.maxWidth = '100%';
-        mangaImage.style.maxHeight = '100%';
-        mangaImage.style.width = 'auto';
-        mangaImage.style.height = 'auto';
-      }
-
-      // Load image
       if (isScrollMode) {
-        loadScrollMode();
+        await loadScrollMode();
       } else {
-        loadPage(1);
+        await loadPage(1);
       }
 
-      // Update button states
-      updatePageNavButtons();
+      updatePageButtons();
     }
 
-    function loadPage(pageNum) {
+    async function loadPage(pageNum) {
+      if (pageNum < 1 || pageNum > episodes[currentEpisodeIndex].pages) return;
+      
       currentPage = pageNum;
       const episode = episodes[currentEpisodeIndex];
-      const paddedPage = String(pageNum).padStart(1, '0');
       
-      let imagePath;
+      const imageUrl = await getImageUrl(episode, pageNum);
       
-      // 联动处理 (联动1.1.jpg 格式)
-      if (episode.folder === '联动01话') {
-        imagePath = `${basePath}${episode.folder}/联动1.${paddedPage}.jpg`;
-      }
-      // 特别篇处理 (特别篇1.1.jpg 格式)
-      else if (episode.folder === '特别篇') {
-        imagePath = `${basePath}${episode.folder}/${episode.folder}1.${paddedPage}.jpg`;
-      }
-      // 小数ID特别篇 (SP格式)
-      else if (episode.id % 1 !== 0) {
-        const spIndex = episodes.filter(ep => ep.id % 1 !== 0).indexOf(episode) + 1;
-        imagePath = `${basePath}${episode.folder}/SP${spIndex}.${paddedPage}.jpg`;
-      }
-      // 普通章节
-      else {
-        imagePath = `${basePath}${episode.folder}/${episode.id}.${paddedPage}.jpg`;
-      }
-      
-      const mangaImage = document.getElementById('mangaImage');
-      mangaImage.style.maxWidth = '100%';
-      mangaImage.style.maxHeight = '100%';
-      mangaImage.style.width = 'auto';
-      mangaImage.style.height = 'auto';
-      
-      mangaImage.src = imagePath;
-      document.getElementById('pageNumberBg').textContent = pageNum;
-      document.getElementById('pageIndicator').textContent = `${pageNum} / ${episode.pages}`;
-      updatePageNavButtons();
-    }
-
-    function nextPage() {
-      const episode = episodes[currentEpisodeIndex];
-      if (currentPage < episode.pages) {
-        loadPage(currentPage + 1);
-      }
-    }
-
-    function prevPage() {
-      if (currentPage > 1) {
-        loadPage(currentPage - 1);
-      }
-    }
-
-    function setupEventListeners() {
-      // Back button
-      document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = './与你编缀的泡沫.html';
-      });
-
-      // Menu button
-      document.getElementById('menuBtn').addEventListener('click', () => {
-        toggleSidebar();
-      });
-
-      // Sidebar overlay
-      document.getElementById('sidebarOverlay').addEventListener('click', () => {
-        closeSidebar();
-      });
-
-      // Mode toggle button
-      document.getElementById('modeToggle').addEventListener('click', () => {
-        toggleReadMode();
-      });
-
-      // Episode navigation buttons
-      document.getElementById('prevBtn').addEventListener('click', () => {
-        if (currentEpisodeIndex > 0) {
-          loadEpisode(currentEpisodeIndex - 1);
-        }
-      });
-
-      document.getElementById('nextBtn').addEventListener('click', () => {
-        if (currentEpisodeIndex < episodes.length - 1) {
-          loadEpisode(currentEpisodeIndex + 1);
-        }
-      });
-
-      // Hide UI button
-      document.getElementById('hideUiBtn').addEventListener('click', () => {
-        toggleUIVisibility();
-      });
-
-      // Keyboard navigation for pages (in single page mode)
-      document.addEventListener('keydown', (e) => {
-        if (document.getElementById('sidebar').classList.contains('active')) return;
+      if (imageUrl) {
+        document.getElementById('mangaImage').src = imageUrl;
+        document.getElementById('pageNumberBg').textContent = pageNum;
+        document.getElementById('pageIndicator').textContent = `${pageNum} / ${episode.pages}`;
+        updatePageButtons();
         
-        if (!isScrollMode) {
-          switch(e.key) {
-            case 'ArrowRight':
-            case ' ':
-              nextPage();
-              break;
-            case 'ArrowLeft':
-              prevPage();
-              break;
-            case 'PageDown':
-              nextPage();
-              e.preventDefault();
-              break;
-            case 'PageUp':
-              prevPage();
-              e.preventDefault();
-              break;
-          }
-        }
-      });
-
-      // Mouse wheel navigation (in single page mode)
-      document.getElementById('mangaPages').addEventListener('wheel', (e) => {
-        if (!isScrollMode) {
-          e.preventDefault();
-          if (e.deltaY > 0) {
-            nextPage();
-          } else {
-            prevPage();
-          }
-        }
-      }, { passive: false });
-    }
-
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-    }
-
-    function closeSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    }
-
-    function updatePageNavButtons() {
-      const episode = episodes[currentEpisodeIndex];
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      
-      prevBtn.disabled = currentEpisodeIndex === 0;
-      nextBtn.disabled = currentEpisodeIndex === episodes.length - 1;
-    }
-
-    function toggleReadMode() {
-      isScrollMode = !isScrollMode;
-      const mangaPages = document.getElementById('mangaPages');
-      const modeToggle = document.getElementById('modeToggle');
-      
-      if (isScrollMode) {
-        mangaPages.classList.remove('single-page');
-        mangaPages.classList.add('scroll-mode');
-        modeToggle.textContent = '📄 滚动模式';
-        loadScrollMode();
-      } else {
-        mangaPages.classList.remove('scroll-mode');
-        mangaPages.classList.add('single-page');
-        modeToggle.textContent = '📖 单页模式';
-        mangaPages.innerHTML = `
-          <div class="page-number-bg" id="pageNumberBg">${currentPage}</div>
-          <img class="manga-image" id="mangaImage" src="" alt="漫画页面">
-        `;
-        loadPage(currentPage);
+        // 强制滚动到顶部，避免图片被UI挡住
+        document.getElementById('mangaPages').scrollTop = 0;
       }
     }
 
-    function loadScrollMode() {
+    async function loadScrollMode() {
       const mangaPages = document.getElementById('mangaPages');
       const episode = episodes[currentEpisodeIndex];
       mangaPages.innerHTML = '';
@@ -756,33 +662,10 @@
 
         const img = document.createElement('img');
         img.className = 'manga-image';
-        const paddedPage = String(i).padStart(1, '0');
         
-        let imagePath;
+        const imageUrl = await getImageUrl(episode, i);
+        if (imageUrl) img.src = imageUrl;
         
-        // 联动处理 (联动1.1.jpg 格式)
-        if (episode.folder === '联动01话') {
-          imagePath = `${basePath}${episode.folder}/联动1.${paddedPage}.jpg`;
-        }
-        // 特别篇处理 (特别篇1.1.jpg 格式)
-        else if (episode.folder === '特别篇') {
-          imagePath = `${basePath}${episode.folder}/${episode.folder}1.${paddedPage}.jpg`;
-        }
-        // 小数ID特别篇 (SP格式)
-        else if (episode.id % 1 !== 0) {
-          const spIndex = episodes.filter(ep => ep.id % 1 !== 0).indexOf(episode) + 1;
-          imagePath = `${basePath}${episode.folder}/SP${spIndex}.${paddedPage}.jpg`;
-        }
-        // 后传
-        else if (episode.folder === '后传') {
-          imagePath = `${basePath}${episode.folder}/${episode.folder}.${paddedPage}.jpg`;
-        }
-        // 普通章节
-        else {
-          imagePath = `${basePath}${episode.folder}/${episode.id}.${paddedPage}.jpg`;
-        }
-        
-        img.src = imagePath;
         img.alt = `页面 ${i}`;
 
         pageContainer.appendChild(pageNum);
@@ -791,22 +674,144 @@
         pageElements.push(pageContainer);
       }
 
-      // Setup scroll tracking
       setupScrollTracking();
       updatePageIndicator();
     }
 
-    function setupScrollTracking() {
+    function nextPage() {
+      const episode = episodes[currentEpisodeIndex];
+      if (currentPage < episode.pages) {
+        loadPage(currentPage + 1);
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        loadPage(currentPage - 1);
+      }
+    }
+
+    function updatePageButtons() {
+      const episode = episodes[currentEpisodeIndex];
+      document.getElementById('prevBtn').disabled = currentEpisodeIndex === 0;
+      document.getElementById('nextBtn').disabled = currentEpisodeIndex === episodes.length - 1;
+      document.getElementById('pageIndicator').textContent = `${currentPage} / ${episode.pages}`;
+    }
+
+    function setupEventListeners() {
+      document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = './与你编缀的泡沫.html';
+      });
+
+      document.getElementById('menuBtn').addEventListener('click', toggleSidebar);
+      document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+      document.getElementById('modeToggle').addEventListener('click', toggleReadMode);
+      
+      // 上一集/下一集按钮 - 切换章节
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentEpisodeIndex > 0) {
+          loadEpisode(currentEpisodeIndex - 1);
+        }
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentEpisodeIndex < episodes.length - 1) {
+          loadEpisode(currentEpisodeIndex + 1);
+        }
+      });
+
+      document.getElementById('hideUiBtn').addEventListener('click', toggleUIVisibility);
+
+      // 键盘翻页 - 同一章内翻页
+      document.addEventListener('keydown', (e) => {
+        if (document.getElementById('sidebar').classList.contains('active')) return;
+        if (!isScrollMode) {
+          if (e.key === 'ArrowRight' || e.key === ' ') {
+            nextPage();
+            e.preventDefault();
+          } else if (e.key === 'ArrowLeft') {
+            prevPage();
+            e.preventDefault();
+          }
+        }
+      });
+
+      // 鼠标滚轮翻页 - 同一章内翻页
+      let wheelTimer = null;
+      document.getElementById('mangaPages').addEventListener('wheel', (e) => {
+        if (!isScrollMode) {
+          e.preventDefault();
+          
+          if (wheelTimer) return;
+          
+          wheelTimer = setTimeout(() => {
+            if (e.deltaY > 0) {
+              nextPage();
+            } else {
+              prevPage();
+            }
+            wheelTimer = null;
+          }, 50);
+        }
+      }, { passive: false });
+
+      // 点击图片翻页 - 同一章内翻页
+      document.getElementById('mangaImage').addEventListener('click', (e) => {
+        if (!isScrollMode) {
+          const clickX = e.clientX;
+          const windowWidth = window.innerWidth;
+          
+          if (clickX > windowWidth * 0.7) {
+            nextPage();
+          } else if (clickX < windowWidth * 0.3) {
+            prevPage();
+          }
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    async function toggleReadMode() {
+      isScrollMode = !isScrollMode;
       const mangaPages = document.getElementById('mangaPages');
-      mangaPages.addEventListener('scroll', updatePageIndicator);
+      const modeToggle = document.getElementById('modeToggle');
+      
+      if (isScrollMode) {
+        mangaPages.classList.remove('single-page');
+        mangaPages.classList.add('scroll-mode');
+        modeToggle.textContent = '📄 滚动模式';
+        await loadScrollMode();
+      } else {
+        mangaPages.classList.remove('scroll-mode');
+        mangaPages.classList.add('single-page');
+        modeToggle.textContent = '📖 单页模式';
+        mangaPages.innerHTML = `
+          <div class="page-number-bg" id="pageNumberBg">${currentPage}</div>
+          <img class="manga-image" id="mangaImage" src="" alt="漫画页面">
+        `;
+        await loadPage(currentPage);
+      }
+    }
+
+    function setupScrollTracking() {
+      document.getElementById('mangaPages').addEventListener('scroll', updatePageIndicator);
     }
 
     function updatePageIndicator() {
       if (!isScrollMode) return;
-
       const mangaPages = document.getElementById('mangaPages');
       const episode = episodes[currentEpisodeIndex];
-
       for (let i = 0; i < pageElements.length; i++) {
         const rect = pageElements[i].getBoundingClientRect();
         if (rect.top <= mangaPages.clientHeight / 2 && rect.bottom >= mangaPages.clientHeight / 2) {
@@ -814,7 +819,6 @@
           break;
         }
       }
-
       document.getElementById('pageIndicator').textContent = `${currentPage} / ${episode.pages}`;
     }
 
@@ -822,28 +826,23 @@
       uiVisible = !uiVisible;
       const header = document.querySelector('header.top-bar');
       const footer = document.querySelector('.footer-nav');
-      const contentArea = document.querySelector('.content-area');
       const mangaPages = document.getElementById('mangaPages');
       const hideBtn = document.getElementById('hideUiBtn');
       
       if (uiVisible) {
-        // Show UI
         header.classList.remove('hidden');
         footer.classList.remove('hidden');
         hideBtn.classList.remove('hidden');
-        contentArea.classList.remove('ui-hidden');
-        mangaPages.classList.remove('ui-hidden');
+        mangaPages.style.height = 'calc(100vh - 140px)';
         hideBtn.textContent = '«';
-        hideBtn.title = '全屏阅读 (Hide UI)';
+        hideBtn.title = '隐藏界面';
       } else {
-        // Hide UI
         header.classList.add('hidden');
         footer.classList.add('hidden');
         hideBtn.classList.add('hidden');
-        contentArea.classList.add('ui-hidden');
-        mangaPages.classList.add('ui-hidden');
+        mangaPages.style.height = '100vh';
         hideBtn.textContent = '»';
-        hideBtn.title = '显示界面 (Show UI)';
+        hideBtn.title = '显示界面';
       }
     }
   </script>
